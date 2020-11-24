@@ -1,10 +1,12 @@
+import { AbstractConnector } from '@web3-react/abstract-connector'
 import { AuthereumConnector } from '@web3-react/authereum-connector'
 import { InjectedConnector } from '@web3-react/injected-connector'
 import { NetworkConnector } from '@web3-react/network-connector'
 import { WalletConnectConnector } from '@web3-react/walletconnect-connector'
+import { ConnectorUpdate } from '@web3-react/types'
 import { ethers } from 'ethers'
 
-import { supportedNetworkIds, supportedNetworkURLs } from '../util/networks'
+import { supportedNetworkIds, supportedNetworkURLs, getInfuraUrl } from '../util/networks'
 
 const MetaMask = new InjectedConnector({
   supportedChainIds: supportedNetworkIds,
@@ -25,27 +27,34 @@ const Authereum = new AuthereumConnector({
   chainId: 1,
 })
 
-class SafeConnector extends Connectors.Connector {
+class SafeConnector extends AbstractConnector {
+
+  address: string = ''
+  networkId: number = 0
+
   init(address: string, networkId: number) {
     this.address = address
     this.networkId = networkId
   }
 
-  // @ts-expect-error ignore
-  getProvider() {
+  public async activate(): Promise<ConnectorUpdate> {
+    return { provider: this.getProvider(), account: this.address }
+  }
+
+  public deactivate() {}
+
+  async getProvider(): Promise<any> {
     const provider = new ethers.providers.JsonRpcProvider(getInfuraUrl(this.networkId), this.networkId)
     const getSigner = provider.getSigner.bind(provider)
     provider.getSigner = () => getSigner(this.address)
-    this.provider = provider
     return provider
   }
 
-  public async getNetworkId(): Promise<number> {
-    const networkId = await this.provider.getNetwork()
-    return this._validateNetworkId(networkId)
+  async getChainId(): Promise<number> {
+    return this.networkId
   }
 
-  public async getAccount(): Promise<string> {
+  async getAccount(): Promise<string> {
     return this.address
   }
 }
