@@ -1,9 +1,9 @@
+import { useWeb3React } from '@web3-react/core'
 import React, { useState } from 'react'
 import { withRouter } from 'react-router'
 import { NavLink, RouteComponentProps, matchPath } from 'react-router-dom'
 import ReactTooltip from 'react-tooltip'
 import styled, { css } from 'styled-components'
-import { useWeb3Context } from 'web3-react/dist'
 
 import { Logo } from '../../../../common/constants'
 import { ButtonCircle, ButtonConnectWallet, ButtonDisconnectWallet, ButtonRound } from '../../../button'
@@ -115,7 +115,7 @@ const CloseIconWrapper = styled.div`
 `
 
 const HeaderContainer: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
-  const context = useWeb3Context()
+  const context = useWeb3React()
 
   const { history, ...restProps } = props
   const [isModalOpen, setModalState] = useState(false)
