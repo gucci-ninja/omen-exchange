@@ -1,4 +1,6 @@
+import { SafeInfo } from '@gnosis.pm/safe-apps-sdk'
 import { useWeb3React } from '@web3-react/core'
+import SafeAppsSdkConnector from 'contract-proxy-kit/lib/esm/safeAppsSdkConnector'
 import * as React from 'react'
 import { Helmet } from 'react-helmet'
 import { Redirect, Route, HashRouter as Router, Switch } from 'react-router-dom'
@@ -16,6 +18,7 @@ import {
   TWITTER_SITE,
 } from '../../common/constants'
 import connectors from '../../util/connectors'
+import { networkIds } from '../../util/networks'
 import { MainScroll, MainWrapper, WrongNetworkMessage } from '../common'
 import { Disclaimer } from '../common/disclaimer'
 import { Footer } from '../common/layout/footer'
@@ -26,12 +29,27 @@ import { MarketHomeContainer } from '../market/sections/market_list/market_home_
 
 const RedirectToHome = () => <Redirect to="/" />
 
+const safeSdk = new SafeAppsSdkConnector()
+
 export const Main: React.FC = () => {
   const context = useWeb3React()
+  const [safeInfo, setSafeInfo] = React.useState(safeSdk.safeAppInfo)
+
+  safeSdk.appsSdk.addListeners({
+    onSafeInfo: (safeInfo: SafeInfo) => setSafeInfo(safeInfo),
+  })
+
   const { activate } = context
+
   React.useEffect(() => {
-    activate(connectors.Infura)
-  }, [activate])
+    if (safeInfo) {
+      const networkId = (networkIds as any)[safeInfo.network.toUpperCase()]
+      connectors.Safe.init(safeInfo.safeAddress, networkId)
+      activate(connectors.Safe)
+    } else {
+      activate(connectors.Infura)
+    }
+  }, [activate, safeInfo])
 
   return (
     <Router>
