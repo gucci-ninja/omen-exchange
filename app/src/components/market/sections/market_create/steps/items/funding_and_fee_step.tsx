@@ -44,6 +44,7 @@ import {
   OutcomesTable,
   OutcomesTableWrapper,
 } from '../../../../common/common_styled'
+import { Compound } from '../../../../common/compound'
 import { CreateCard } from '../../../../common/create_card'
 import { CurrencySelector } from '../../../../common/currency_selector'
 import { DisplayArbitrator } from '../../../../common/display_arbitrator'
@@ -404,7 +405,7 @@ const FundingAndFeeStep: React.FC<Props> = (props: Props) => {
                   onChange={handleAmountChange}
                   style={{ width: 0 }}
                   value={amount}
-                  valueToDisplay={amountToDispaly}
+                  valueToDisplay={'amountToDispaly'}
                 />
               }
               onClickMaxButton={onClickMaxButton}
@@ -422,9 +423,9 @@ const FundingAndFeeStep: React.FC<Props> = (props: Props) => {
           <div>
             <TransactionDetailsCard>
               <TransactionDetailsRow
-                state={ValueStates.important}
-                title={'Earn Trading Fee'}
-                value={`${isNaN(spread) ? 0 : spread}%`}
+                title={'Deposit Amount'}
+                value={`${formatNumber(formatBigNumber(funding, collateral.decimals))} ${collateral.symbol}`}
+                // value={`${isNaN(spread) ? 0 : spread}%`}
               />
               <TransactionDetailsLine />
               <TransactionDetailsRow
@@ -453,6 +454,14 @@ const FundingAndFeeStep: React.FC<Props> = (props: Props) => {
             hyperlinkDescription={''}
           />
         )}
+        <Compound
+          collateral={collateral}
+          finished={allowanceFinished && RemoteData.is.success(allowance)}
+          loading={RemoteData.is.asking(allowance)}
+          marginBottom
+          onUnlock={unlockCollateral}
+          style={{ marginBottom: 20 }}
+        />
         {showSetAllowance && (
           <SetAllowance
             collateral={collateral}
